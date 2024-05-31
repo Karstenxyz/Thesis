@@ -1,0 +1,71 @@
+import os
+import ssl
+import nltk
+import pandas as pd
+import re
+from nltk.corpus import stopwords
+from nltk.stem import WordNetLemmatizer
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.cluster import KMeans
+
+# Point NLTK to the local data directory
+nltk.data.path.append('/Users/karsten/nltk_data')
+
+# Configure SSL context to bypass verification
+ssl._create_default_https_context = ssl._create_unverified_context
+
+# Download necessary NLTK resources if not already present
+try:
+    stop_words = stopwords.words('english')
+except LookupError:
+    nltk.download('stopwords')
+    stop_words = stopwords.words('english')
+
+try:
+    nltk.download('wordnet')
+except LookupError:
+    nltk.download('wordnet')
+
+# Step 1: Read Titles from Excel
+file_path = '/Users/karsten/Downloads/Titles_proposals.xlsx'  # Update this with your actual file path
+data = pd.read_excel(file_path)
+
+# Ensure the Excel sheet has a column named 'title'
+if 'title' not in data.columns:
+    raise ValueError("The Excel sheet must have a column named 'title'")
+
+# Step 2: Text Preprocessing
+def preprocess_text(text):
+    text = re.sub(r'\W', ' ', text)
+    text = re.sub(r'\s+', ' ', text)
+    text = text.lower()
+    text = text.strip()
+    return text
+
+data['cleaned_title'] = data['title'].apply(preprocess_text)
+
+lemmatizer = WordNetLemmatizer()
+stop_words = set(stopwords.words('english'))
+
+def remove_stopwords_and_lemmatize(text):
+    words = text.split()
+    words = [lemmatizer.lemmatize(word) for word in words if word not in stop_words]
+    return ' '.join(words)
+
+data['processed_title'] = data['cleaned_title'].apply(remove_stopwords_and_lemmatize)
+
+# Step 3: TF-IDF Transformation
+tfidf_vectorizer = TfidfVectorizer()
+tfidf_matrix = tfidf_vectorizer.fit_transform(data['processed_title'])
+
+# Step 4: Clustering
+num_clusters = 5  # Adjust the number of clusters as needed
+kmeans = KMeans(n_clusters=num_clusters, random_state=42)
+data['cluster'] = kmeans.fit_predict(tfidf_matrix)
+data['category'] = data['cluster'].map(lambda x: f'Category {x+1}')
+
+# Save the categorized proposals to an Excel file
+output_file_path = '/Users/karsten/Downloads//output_file.xlsx'  # Update this with your desired output file path
+data.to_excel(output_file_path, index=False)
+
+print(f"Categorized proposals saved to {output_file_path}")
