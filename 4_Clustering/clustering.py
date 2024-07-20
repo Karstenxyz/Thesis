@@ -17,7 +17,7 @@ pca = PCA(n_components=2, random_state=42)
 X_reduced = pca.fit_transform(X.toarray())
 
 # Clustering
-num_clusters = 6  # Choose an appropriate number of clusters
+num_clusters = 6 
 kmeans = KMeans(n_clusters=num_clusters, random_state=42)
 labels = kmeans.fit_predict(X_reduced)
 
