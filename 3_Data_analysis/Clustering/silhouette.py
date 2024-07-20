@@ -12,7 +12,7 @@ cleaned_data = pd.read_excel('/Users/karsten/Downloads/Thesis/Cleaned data/Datas
 vectorizer = TfidfVectorizer()
 X = vectorizer.fit_transform(cleaned_data['cleaned_titles'])
 
-# Dimensionality Reduction (optional)
+# Dimensionality Reduction
 pca = PCA(n_components=2, random_state=42)
 X_reduced = pca.fit_transform(X.toarray())
 
@@ -30,7 +30,7 @@ def find_optimal_clusters(data, max_k):
     return iters, s_scores
 
 # Find the optimal number of clusters
-max_k = 10  # Maximum number of clusters to try
+max_k = 10  
 iters, s_scores = find_optimal_clusters(X_reduced, max_k)
 
 # Plot the silhouette scores
