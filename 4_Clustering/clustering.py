@@ -12,7 +12,7 @@ cleaned_data = pd.read_excel('/Users/karsten/Downloads/Thesis/Cleaned data/Datas
 vectorizer = TfidfVectorizer()
 X = vectorizer.fit_transform(cleaned_data['cleaned_titles'])
 
-# Dimensionality Reduction (optional)
+# Dimensionality Reduction
 pca = PCA(n_components=2, random_state=42)
 X_reduced = pca.fit_transform(X.toarray())
 
